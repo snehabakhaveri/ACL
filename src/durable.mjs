@@ -1,6 +1,7 @@
 export class User {
     constructor(state, env) {
         this.state = state;
+        this.userExists = false;
         this.localStorage = new Map();
         this.wsServer = new Set();
     }
@@ -16,6 +17,9 @@ export class User {
         }
         else if (url.pathname == "/get") {
             return await this.get(queryString);
+        }
+        else if(url.pathname=='/check'){
+            return await this.check();
         }
         else if (upgradeHeader || upgradeHeader == 'websocket') {
             const webSocketPair = new WebSocketPair();
@@ -38,31 +42,31 @@ export class User {
         }
         else {
             console.log("invalid path");
-            return genresponse("invalid path", 404);
+            return genResponse("invalid path", 404);
         }
 
-    }
-    
+    } 
     async save(queryString) {
         let id = queryString.get("id");
         let value = queryString.get("v");
        
         if (!id || !value) {
-            return genresponse("invalid parameter for save", 404);
+            return genResponse("invalid parameter for save", 404);
         }
-        await this.state.storage.put(id, value);
-        this.localStorage.set(id, value);
+        await this.state.storage.put(id,value);
+        await this.state.storage.put("userExists",true);
+        this.localStorage.set(id, value);         
         for(const ws of this.wsServer)
         {
             ws.send("change id -> " + id + "\nvalue -> " + value);
         
         }
-        return genresponse("save successful", 200);
+        return genResponse("save successful", 200);
     }
     async get(queryString) {
         let id = queryString.get("id");
         if (!id) {
-            return genresponse("invalid parameter", 404);
+            return genResponse("invalid parameter", 404);
 
         }
         let obj = {};
@@ -75,9 +79,17 @@ export class User {
             this.localStorage.set(obj.id, obj.value);
             obj.from = "durableStorage"
         }
-        return genresponse(JSON.stringify(obj), 200);
+        return genResponse(JSON.stringify(obj), 200);
+    }
+    async check(){
+        if(!await this.state.storage.get("userExists")){
+            return genResponse("User does not exist",404);
+        }
+        else{
+            return genResponse("Valid user",200);
+        }
     }
 }
-function genresponse(body, statusCode) {
+function genResponse(body, statusCode) {
     return new Response(body, { status: statusCode });
 }
