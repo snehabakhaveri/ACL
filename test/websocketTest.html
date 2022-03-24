@@ -1,0 +1,39 @@
+<html>
+
+<head>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+</head>
+<script>
+    $(document).ready(function () {
+        $("#get").click(function () {
+           // let url = "wss://durable-test1.nile.workers.dev?uname=" + $("#txtUname").val();
+            let url = "ws://127.0.0.1:8787/?uname=" + $("#txtUname").val();
+            console.log(url);
+            websocket(url);
+        })
+        function websocket(url) {
+            // Make a fetch request including `Upgrade: websocket` header.
+            // The Workers Runtime will automatically handle other requirements
+            // of the WebSocket protocol, like the Sec-WebSocket-Key header.
+            let ws = new WebSocket(url);
+
+            if (!ws) {
+                throw new Error("server didn't accept WebSocket");
+            }
+
+            console.log("web socket successfuly initilalized");
+            // Now you can send and receive messages like before.
+            // ws.send('hello');
+            ws.addEventListener('message', msg => {
+                console.log(msg.data);
+            });
+        }
+    });
+</script>
+
+<body>
+    <input type="text" id="txtUname" class="textbox" value="">
+    <button id="get">get</button>
+</body>
+
+</html>
