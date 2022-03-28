@@ -1,7 +1,7 @@
 name = "durable-test1"
 # type = "javascript" is required to use the `[build]` section
 type = "javascript"
-account_id = ""
+account_id = "8e868a6f765b57337f86f8ba9c6e1515"
 workers_dev = true
 route = ""
 zone_id = ""
